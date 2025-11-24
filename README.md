@@ -21,6 +21,12 @@ A minimalist command-line timer with smart time parsing and system integration.
 ### Homebrew (Recommended)
 
 ```bash
+brew install dandaniel5/timer/timer
+```
+
+Or tap first, then install:
+
+```bash
 brew tap dandaniel5/timer
 brew install timer
 ```
