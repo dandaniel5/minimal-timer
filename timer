@@ -3,7 +3,12 @@ import sys
 import time
 import re
 import argparse
+import os
+import subprocess
+import tempfile
+import json
 from datetime import datetime, timedelta
+from pathlib import Path
 
 def parse_time_string(time_str):
     """
@@ -98,11 +103,84 @@ def format_duration_short(seconds):
         
     return " ".join(parts)
 
+TIMERS_DIR = Path(tempfile.gettempdir()) / "smart_timers"
+
+def save_timer_info(name, pid, end_time):
+    """Save running timer info to temp directory"""
+    TIMERS_DIR.mkdir(exist_ok=True)
+    timer_file = TIMERS_DIR / f"timer_{pid}.json"
+    data = {
+        "name": name,
+        "pid": pid,
+        "end_time": end_time
+    }
+    with open(timer_file, 'w') as f:
+        json.dump(data, f)
+
+def remove_timer_info(pid):
+    """Remove timer info when done"""
+    timer_file = TIMERS_DIR / f"timer_{pid}.json"
+    if timer_file.exists():
+        timer_file.unlink()
+
+def list_timers():
+    """List all running timers"""
+    if not TIMERS_DIR.exists():
+        print("No running timers")
+        return
+    
+    timer_files = list(TIMERS_DIR.glob("timer_*.json"))
+    if not timer_files:
+        print("No running timers")
+        return
+    
+    print("Running timers:")
+    for timer_file in timer_files:
+        try:
+            with open(timer_file, 'r') as f:
+                data = json.load(f)
+            
+            remaining = data['end_time'] - time.time()
+            if remaining <= 0:
+                timer_file.unlink()  # Clean up finished timer
+                continue
+            
+            time_str = format_duration_short(remaining)
+            name = data.get('name', 'Timer')
+            if name:
+                print(f"  {name}  {time_str}")
+            else:
+                print(f"  {time_str}")
+        except:
+            continue
+
+def sleep_system():
+    """Put system to sleep (macOS)"""
+    try:
+        subprocess.run(['pmset', 'sleepnow'], check=True)
+    except Exception as e:
+        print(f"Failed to sleep system: {e}")
+
+def sleep_display():
+    """Put display to sleep (macOS)"""
+    try:
+        subprocess.run(['pmset', 'displaysleepnow'], check=True)
+    except Exception as e:
+        print(f"Failed to sleep display: {e}")
+
 def main():
     parser = argparse.ArgumentParser(description="Smart Terminal Timer")
     parser.add_argument('time_input', nargs='*', help="Time to count down (e.g. '10m', '1h 30s', '5'). Default unit is minutes.")
     parser.add_argument('-n', '--name', type=str, help="Timer name/label")
+    parser.add_argument('-s', '--sleep', action='store_true', help="Sleep system after timer")
+    parser.add_argument('-sd', '--sleep-display', action='store_true', help="Sleep display after timer")
+    parser.add_argument('-ls', '--list', action='store_true', help="List all running timers")
     args = parser.parse_args()
+    
+    # Handle list command
+    if args.list:
+        list_timers()
+        sys.exit(0)
     
     if not args.time_input:
         print("Please provide a time duration.")
@@ -124,8 +202,9 @@ def main():
     start_time = time.time()
     end_time = start_time + duration_seconds
     
-    # Prepare timer label
-    timer_label = args.name if args.name else "Timer"
+    # Save timer info
+    pid = os.getpid()
+    save_timer_info(args.name, pid, end_time)
     
     try:
         while True:
@@ -147,6 +226,9 @@ def main():
             sys.stdout.flush()
             time.sleep(0.1)
             
+        # Clean up timer info
+        remove_timer_info(pid)
+        
         if args.name:
             print(f"\r\033[K{args.name}  Done!")
         else:
@@ -155,7 +237,16 @@ def main():
         sys.stdout.write('\a')
         sys.stdout.flush()
         
+        # Handle sleep options
+        if args.sleep:
+            sleep_system()
+        elif args.sleep_display:
+            sleep_display()
+        
     except KeyboardInterrupt:
+        # Clean up timer info
+        remove_timer_info(pid)
+        
         if args.name:
             print(f"\n\033[K{args.name}  Cancelled")
         else:
