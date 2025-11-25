@@ -305,7 +305,7 @@
             <div class="badges">
                 <span class="badge">🐍 Python 3.6+</span>
                 <span class="badge">⚖️ GPL v3</span>
-                <span class="badge">📦 v1.0.0</span>
+                <span class="badge">📦 v1.0.4</span>
             </div>
 
             <div class="install-section">
@@ -313,8 +313,6 @@
                     <div class="tabs">
                         <button class="tab-btn active" onclick="showCmd('pip')">PyPI (Universal)</button>
                         <button class="tab-btn" onclick="showCmd('brew')">Homebrew (macOS)</button>
-                        <button class="tab-btn" onclick="showCmd('snap')">Snap (Linux)</button>
-                        <button class="tab-btn" onclick="showCmd('winget')">Winget (Windows)</button>
                     </div>
 
                     <div class="command-box" id="cmd-box">
@@ -353,6 +351,11 @@
                 <p>Run any shell command when the timer finishes using the <code>-e</code> flag. Great for custom
                     notifications.</p>
             </div>
+            <div class="feature-card">
+                <span class="feature-icon">ℹ️</span>
+                <h3>Version Info</h3>
+                <p>Check your installed version with <code>-v</code> or <code>--version</code> flag.</p>
+            </div>
         </section>
 
         <section class="usage-section">
@@ -387,9 +390,7 @@
     <script>
         const commands = {
             'pip': 'pip install minimal-timer',
-            'brew': 'brew install dandaniel5/timer/timer',
-            'snap': 'snap install minimal-timer',
-            'winget': 'winget install DanilKodolov.MinimalTimer'
+            'brew': 'brew install dandaniel5/timer/timer'
         };
 
         function showCmd(type) {
