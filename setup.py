@@ -12,7 +12,7 @@ long_description = readme_file.read_text(encoding="utf-8") if readme_file.exists
 
 setup(
     name="minimal-timer",
-    version="1.0.0",
+    version="1.0.1",
     description="A minimalist command-line timer with smart time parsing and system integration",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -23,7 +23,6 @@ setup(
     
     # Package data
     py_modules=["timer"],
-    scripts=["timer"],
     
     # Requirements
     python_requires=">=3.6",

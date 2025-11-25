@@ -8,7 +8,7 @@ class Timer < Formula
   depends_on "python@3"
 
   def install
-    bin.install "timer"
+    bin.install "timer.py" => "timer"
   end
 
   test do

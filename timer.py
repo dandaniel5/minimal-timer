@@ -1,0 +1,265 @@
+#!/usr/bin/env python3
+import sys
+import time
+import re
+import argparse
+import os
+import subprocess
+import tempfile
+import json
+from datetime import datetime, timedelta
+from pathlib import Path
+
+def parse_time_string(time_str):
+    """
+    Parses a natural language time string into total seconds.
+    Supports years, days, hours, minutes, seconds.
+    Default unit is minutes if no unit is specified for a number.
+    """
+    # Normalize input: lowercase
+    time_str = time_str.lower()
+    
+    # Regex to find number and optional unit
+    # Matches: "10", "10m", "10 minutes", "1.5h", etc.
+    pattern = r'(\d+(?:\.\d+)?)\s*([a-z]*)'
+    matches = re.findall(pattern, time_str)
+    
+    total_seconds = 0
+    
+    # Define multipliers for seconds
+    units = {
+        'y': 31536000, 'year': 31536000, 'years': 31536000,
+        'w': 604800, 'week': 604800, 'weeks': 604800,
+        'd': 86400, 'day': 86400, 'days': 86400,
+        'h': 3600, 'hour': 3600, 'hours': 3600,
+        'm': 60, 'min': 60, 'minute': 60, 'minutes': 60,
+        's': 1, 'sec': 1, 'second': 1, 'seconds': 1
+    }
+    
+    for amount_str, unit_str in matches:
+        if not amount_str:
+            continue
+            
+        amount = float(amount_str)
+        unit = unit_str.strip()
+        
+        if not unit:
+            # Default to minutes if no unit provided
+            multiplier = 60
+        elif unit in units:
+            multiplier = units[unit]
+        else:
+            continue
+            
+        total_seconds += amount * multiplier
+        
+    return total_seconds
+
+def format_duration_short(seconds):
+    """
+    Formats seconds into short format: Xd Xh Xm Xs (hiding zero units)
+    """
+    if seconds <= 0:
+        return "0s"
+    
+    # Constants
+    YEAR = 31536000
+    WEEK = 604800
+    DAY = 86400
+    HOUR = 3600
+    MINUTE = 60
+    
+    parts = []
+    
+    years = int(seconds // YEAR)
+    seconds %= YEAR
+    
+    weeks = int(seconds // WEEK)
+    seconds %= WEEK
+    
+    days = int(seconds // DAY)
+    seconds %= DAY
+    
+    hours = int(seconds // HOUR)
+    seconds %= HOUR
+    
+    minutes = int(seconds // MINUTE)
+    seconds %= MINUTE
+    
+    secs = int(seconds)
+    
+    if years > 0:
+        parts.append(f"{years}y")
+    if weeks > 0:
+        parts.append(f"{weeks}w")
+    if days > 0:
+        parts.append(f"{days}d")
+    if hours > 0:
+        parts.append(f"{hours}h")
+    if minutes > 0:
+        parts.append(f"{minutes}m")
+    if secs > 0 or not parts:
+        parts.append(f"{secs}s")
+        
+    return " ".join(parts)
+
+TIMERS_DIR = Path(tempfile.gettempdir()) / "smart_timers"
+
+def save_timer_info(name, pid, end_time):
+    """Save running timer info to temp directory"""
+    TIMERS_DIR.mkdir(exist_ok=True)
+    timer_file = TIMERS_DIR / f"timer_{pid}.json"
+    data = {
+        "name": name,
+        "pid": pid,
+        "end_time": end_time
+    }
+    with open(timer_file, 'w') as f:
+        json.dump(data, f)
+
+def remove_timer_info(pid):
+    """Remove timer info when done"""
+    timer_file = TIMERS_DIR / f"timer_{pid}.json"
+    if timer_file.exists():
+        timer_file.unlink()
+
+def list_timers():
+    """List all running timers"""
+    if not TIMERS_DIR.exists():
+        print("No running timers")
+        return
+    
+    timer_files = list(TIMERS_DIR.glob("timer_*.json"))
+    if not timer_files:
+        print("No running timers")
+        return
+    
+    print("Running timers:")
+    for timer_file in timer_files:
+        try:
+            with open(timer_file, 'r') as f:
+                data = json.load(f)
+            
+            remaining = data['end_time'] - time.time()
+            if remaining <= 0:
+                timer_file.unlink()  # Clean up finished timer
+                continue
+            
+            time_str = format_duration_short(remaining)
+            name = data.get('name', 'Timer')
+            if name:
+                print(f"  {name}  {time_str}")
+            else:
+                print(f"  {time_str}")
+        except:
+            continue
+
+def sleep_system():
+    """Put system to sleep (macOS)"""
+    try:
+        subprocess.run(['pmset', 'sleepnow'], check=True)
+    except Exception as e:
+        print(f"Failed to sleep system: {e}")
+
+def sleep_display():
+    """Put display to sleep (macOS)"""
+    try:
+        subprocess.run(['pmset', 'displaysleepnow'], check=True)
+    except Exception as e:
+        print(f"Failed to sleep display: {e}")
+
+def main():
+    parser = argparse.ArgumentParser(description="Smart Terminal Timer")
+    parser.add_argument('time_input', nargs='*', help="Time to count down (e.g. '10m', '1h 30s', '5'). Default unit is minutes.")
+    parser.add_argument('-n', '--name', type=str, help="Timer name/label")
+    parser.add_argument('-s', '--sleep', action='store_true', help="Sleep system after timer")
+    parser.add_argument('-sd', '--sleep-display', action='store_true', help="Sleep display after timer")
+    parser.add_argument('-e', '--execute', type=str, help="Command to execute after timer")
+    parser.add_argument('-ls', '--list', action='store_true', help="List all running timers")
+    args = parser.parse_args()
+    
+    # Handle list command
+    if args.list:
+        list_timers()
+        sys.exit(0)
+    
+    if not args.time_input:
+        print("Please provide a time duration.")
+        sys.exit(1)
+        
+    # Join all arguments to handle "1 hour 30 minutes" as a single string
+    full_time_str = " ".join(args.time_input)
+    
+    try:
+        duration_seconds = parse_time_string(full_time_str)
+    except Exception as e:
+        print(f"Error parsing time: {e}")
+        sys.exit(1)
+        
+    if duration_seconds <= 0:
+        print("Timer must be greater than 0.")
+        sys.exit(1)
+        
+    start_time = time.time()
+    end_time = start_time + duration_seconds
+    
+    # Save timer info
+    pid = os.getpid()
+    save_timer_info(args.name, pid, end_time)
+    
+    try:
+        while True:
+            now = time.time()
+            remaining = end_time - now
+            
+            if remaining <= 0:
+                break
+                
+            time_str = format_duration_short(remaining)
+            
+            # Single line output: name Xd Xh Xm Xs or just Xd Xh Xm Xs
+            if args.name:
+                output = f"\r\033[K{args.name}  {time_str}"
+            else:
+                output = f"\r\033[K{time_str}"
+            
+            sys.stdout.write(output)
+            sys.stdout.flush()
+            time.sleep(0.1)
+            
+        # Clean up timer info
+        remove_timer_info(pid)
+        
+        if args.name:
+            print(f"\r\033[K{args.name}  Done!")
+        else:
+            print(f"\r\033[KDone!")
+        
+        sys.stdout.write('\a')
+        sys.stdout.flush()
+        
+        # Handle sleep options
+        if args.sleep:
+            sleep_system()
+        elif args.sleep_display:
+            sleep_display()
+            
+        # Handle execution command
+        if args.execute:
+            try:
+                subprocess.run(args.execute, shell=True)
+            except Exception as e:
+                print(f"\nError executing command: {e}")
+        
+    except KeyboardInterrupt:
+        # Clean up timer info
+        remove_timer_info(pid)
+        
+        if args.name:
+            print(f"\n\033[K{args.name}  Cancelled")
+        else:
+            print(f"\n\033[KCancelled")
+        sys.exit(0)
+
+if __name__ == "__main__":
+    main()

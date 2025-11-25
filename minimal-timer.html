@@ -7,34 +7,40 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
     <!-- SEO Meta Tags -->
-    <title>Minimal Timer - Smart Command-Line Timer for macOS</title>
+    <title>Minimal Timer - Universal Command-Line Timer</title>
     <meta name="description"
-        content="Minimalist command-line timer with smart time parsing. Features natural language input, named timers, auto-sleep, and audio notifications. Easy installation via Homebrew.">
+        content="Minimalist command-line timer with smart time parsing. Works on Windows, macOS, Linux, and Unix. Features natural language input, named timers, and system integration.">
     <meta name="keywords"
-        content="timer, command-line, terminal, macOS, productivity, pomodoro, minimalist, homebrew, python">
+        content="timer, command-line, terminal, cli, productivity, pomodoro, python, pypi, homebrew, snap, winget">
     <meta name="author" content="Danil Kodolov">
 
     <!-- Open Graph / Social Media Meta Tags -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="Minimal Timer - Smart Command-Line Timer for macOS">
+    <meta property="og:title" content="Minimal Timer - Universal Command-Line Timer">
     <meta property="og:description"
-        content="Minimalist command-line timer with smart time parsing. Features natural language input, named timers, auto-sleep, and audio notifications.">
+        content="Minimalist command-line timer with smart time parsing. Works on Windows, macOS, Linux, and Unix.">
     <meta property="og:url" content="https://github.com/dandaniel5/minimal-timer">
     <meta property="og:site_name" content="Minimal Timer">
 
-    <!-- Twitter Card Meta Tags -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Minimal Timer - Smart Command-Line Timer for macOS">
-    <meta name="twitter:description"
-        content="Minimalist command-line timer with smart time parsing. Features natural language input, named timers, auto-sleep, and audio notifications.">
-
-    <!-- Canonical URL -->
-    <link rel="canonical" href="https://github.com/dandaniel5/minimal-timer">
-
-    <!-- Favicon (optional - add if you have one) -->
-    <!-- <link rel="icon" type="image/png" href="favicon.png"> -->
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;800&display=swap"
+        rel="stylesheet">
 
     <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --accent-color: #3b82f6;
+            --accent-hover: #2563eb;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --code-bg: #1e293b;
+            --success: #10b981;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -42,200 +48,378 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-color);
+            background-image:
+                radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.15) 0px, transparent 50%);
+            color: var(--text-primary);
             min-height: 100vh;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
-            padding: 20px;
+            line-height: 1.6;
         }
 
         .container {
-            max-width: 800px;
+            max-width: 900px;
             width: 100%;
+            padding: 60px 20px;
         }
 
-        .hero-section {
-            padding: 40px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            color: white;
-        }
-
-        .header {
+        /* Hero Section */
+        .hero {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 60px;
+            animation: fadeIn 0.8s ease-out;
         }
 
-        .header h1 {
-            font-size: 2.5em;
-            margin: 0 0 10px 0;
+        .hero h1 {
+            font-size: 3.5em;
             font-weight: 800;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
         }
 
-        .header p {
-            font-size: 1.2em;
-            opacity: 0.9;
-            margin: 0;
+        .hero p {
+            font-size: 1.25em;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 30px;
         }
 
-        .features-box {
-            background: rgba(255, 255, 255, 0.15);
-            padding: 25px;
-            border-radius: 15px;
-            margin: 25px 0;
-            backdrop-filter: blur(10px);
+        .badges {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
         }
 
-        .features-box h2 {
-            margin: 0 0 15px 0;
-            font-size: 1.3em;
+        .badge {
+            background: var(--card-bg);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
-        .features-box ul {
-            margin: 0;
-            padding-left: 20px;
-            line-height: 1.8;
+        /* Installation Section */
+        .install-section {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 2px;
+            /* For gradient border */
+            background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            margin-bottom: 50px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(12px);
         }
 
-        .code-inline {
-            background: rgba(0, 0, 0, 0.2);
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-family: 'Monaco', 'Courier New', monospace;
+        .install-content {
+            background: var(--bg-color);
+            border-radius: 22px;
+            padding: 30px;
         }
 
-        .code-block {
-            background: rgba(0, 0, 0, 0.3);
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 8px 16px;
+            cursor: pointer;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .tab-btn.active {
+            background: var(--code-bg);
+            color: var(--accent-color);
+        }
+
+        .tab-btn:hover:not(.active) {
+            color: var(--text-primary);
+        }
+
+        .command-box {
+            background: var(--code-bg);
             padding: 20px;
             border-radius: 12px;
-            margin: 25px 0;
-            font-family: 'Monaco', 'Courier New', monospace;
-            font-size: 0.9em;
-        }
-
-        .code-block-title {
-            margin-bottom: 15px;
-            opacity: 0.8;
-        }
-
-        .code-block code {
-            display: block;
-            margin: 5px 0;
-        }
-
-        .buttons {
+            font-family: 'JetBrains Mono', monospace;
             display: flex;
-            gap: 15px;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-top: 30px;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .btn {
-            display: inline-block;
-            padding: 12px 30px;
-            text-decoration: none;
-            border-radius: 25px;
-            font-weight: 600;
+        .command-text {
+            color: var(--success);
+        }
+
+        .copy-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-secondary);
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+        }
+
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 50px;
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
             transition: transform 0.2s;
         }
 
-        .btn:hover {
-            transform: translateY(-2px);
+        .feature-card:hover {
+            transform: translateY(-5px);
+            background: rgba(30, 41, 59, 0.9);
         }
 
-        .btn-primary {
-            background: white;
-            color: #667eea;
+        .feature-icon {
+            font-size: 2em;
+            margin-bottom: 15px;
+            display: block;
         }
 
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: 2px solid white;
+        .feature-card h3 {
+            margin-bottom: 10px;
+            font-weight: 600;
         }
 
-        .footer {
+        .feature-card p {
+            color: var(--text-secondary);
+            font-size: 0.95em;
+        }
+
+        /* Usage Examples */
+        .usage-section {
+            margin-bottom: 50px;
+        }
+
+        .usage-section h2 {
             text-align: center;
-            margin-top: 25px;
-            font-size: 0.9em;
-            opacity: 0.8;
+            margin-bottom: 30px;
+            font-size: 2em;
         }
 
-        .footer p {
-            margin: 5px 0;
+        .code-example {
+            background: var(--code-bg);
+            padding: 15px 20px;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--accent-color);
+            color: var(--text-secondary);
         }
 
-        .footer a {
-            color: white;
-            text-decoration: underline;
+        .code-example span {
+            color: var(--text-primary);
+        }
+
+        /* Footer */
+        footer {
+            margin-top: auto;
+            padding: 40px 0;
+            text-align: center;
+            color: var(--text-secondary);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            width: 100%;
+        }
+
+        footer a {
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        footer a:hover {
+            color: var(--accent-color);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         @media (max-width: 768px) {
-            .hero-section {
-                padding: 30px 20px;
+            .hero h1 {
+                font-size: 2.5em;
             }
 
-            .header h1 {
-                font-size: 2em;
-            }
-
-            .header p {
-                font-size: 1em;
+            .container {
+                padding: 40px 20px;
             }
         }
     </style>
 </head>
 
 <body>
-    <main class="container">
-        <section class="hero-section">
-            <header class="header">
-                <h1>Minimal Timer</h1>
-                <p>Minimalist command-line timer with smart time parsing</p>
-            </header>
+    <div class="container">
+        <section class="hero">
+            <h1>Minimal Timer</h1>
+            <p>A universal, distraction-free command-line timer for developers. Works on Windows, macOS, and Linux.</p>
 
-            <div class="features-box">
-                <h2>✨ Features</h2>
-                <ul>
-                    <li>🕐 Smart parsing: <code class="code-inline">10m</code>, <code class="code-inline">1h 30s</code>,
-                        <code class="code-inline">2d 5h</code></li>
-                    <li>📝 Named timers with <code class="code-inline">-n</code> flag</li>
-                    <li>💤 Auto-sleep system (<code class="code-inline">-s</code>) or display (<code
-                            class="code-inline">-sd</code>)</li>
-                    <li>📋 Multiple timers with <code class="code-inline">-ls</code> to list</li>
-                    <li>⚡ Minimal, clean output</li>
-                    <li>🔔 Audio notification on completion</li>
-                </ul>
+            <div class="badges">
+                <span class="badge">🐍 Python 3.6+</span>
+                <span class="badge">⚖️ GPL v3</span>
+                <span class="badge">📦 v1.0.0</span>
             </div>
 
-            <div class="code-block">
-                <div class="code-block-title">📥 Installation:</div>
-                <code>brew install dandaniel5/timer/timer</code>
-                <div class="code-block-title" style="margin-top: 20px;">🚀 Quick Examples:</div>
-                <code>timer 10m</code>
-                <code>timer 25m -n "Pomodoro" -s</code>
-                <code>timer 1h 30m -sd</code>
-                <code>timer -ls</code>
+            <div class="install-section">
+                <div class="install-content">
+                    <div class="tabs">
+                        <button class="tab-btn active" onclick="showCmd('pip')">PyPI (Universal)</button>
+                        <button class="tab-btn" onclick="showCmd('brew')">Homebrew (macOS)</button>
+                        <button class="tab-btn" onclick="showCmd('snap')">Snap (Linux)</button>
+                        <button class="tab-btn" onclick="showCmd('winget')">Winget (Windows)</button>
+                    </div>
+
+                    <div class="command-box" id="cmd-box">
+                        <span class="command-text" id="cmd-text">pip install minimal-timer</span>
+                        <button class="copy-btn" onclick="copyCmd()">Copy</button>
+                    </div>
+                </div>
             </div>
-
-            <nav class="buttons">
-                <a href="https://github.com/dandaniel5/minimal-timer" class="btn btn-primary"
-                    aria-label="View Minimal Timer on GitHub">📦 GitHub</a>
-                <a href="https://github.com/dandaniel5/minimal-timer/releases" class="btn btn-secondary"
-                    aria-label="Download Minimal Timer releases">🚀 Releases</a>
-            </nav>
-
-            <footer class="footer">
-                <p>Created by <a href="https://github.com/dandaniel5" rel="noopener noreferrer" target="_blank">Danil
-                        Kodolov</a></p>
-                <p>MIT License • Python 3.6+ • macOS</p>
-            </footer>
         </section>
-    </main>
+
+        <section class="features-grid">
+            <div class="feature-card">
+                <span class="feature-icon">🧠</span>
+                <h3>Smart Parsing</h3>
+                <p>Natural language input like <code>10m</code>, <code>1h 30s</code>, or <code>2d 5h</code>. No complex
+                    flags needed.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">📝</span>
+                <h3>Named Timers</h3>
+                <p>Label your timers with <code>-n</code> to keep track of multiple tasks simultaneously.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">💤</span>
+                <h3>System Integration</h3>
+                <p>Auto-sleep system (<code>-s</code>) or display (<code>-sd</code>) when the timer completes.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">🔔</span>
+                <h3>Notifications</h3>
+                <p>Audio alerts on completion and clean, distraction-free terminal output.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">🚀</span>
+                <h3>Execute Command</h3>
+                <p>Run any shell command when the timer finishes using the <code>-e</code> flag. Great for custom
+                    notifications.</p>
+            </div>
+        </section>
+
+        <section class="usage-section">
+            <h2>Quick Examples</h2>
+            <div class="code-example">
+                # Simple 10 minute timer<br>
+                <span>timer 10m</span>
+            </div>
+            <div class="code-example">
+                # Pomodoro with name<br>
+                <span>timer 25m -n "Deep Work"</span>
+            </div>
+            <div class="code-example">
+                # Sleep display after 1 hour<br>
+                <span>timer 1h -sd</span>
+            </div>
+            <div class="code-example">
+                # List all running timers<br>
+                <span>timer -ls</span>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <p>Created by <a href="https://github.com/dandaniel5">Danil Kodolov</a></p>
+        <p style="font-size: 0.9em; margin-top: 10px;">
+            Licensed under <a href="https://www.gnu.org/licenses/gpl-3.0">GPL v3</a> •
+            <a href="https://github.com/dandaniel5/minimal-timer">View on GitHub</a>
+        </p>
+    </footer>
+
+    <script>
+        const commands = {
+            'pip': 'pip install minimal-timer',
+            'brew': 'brew install dandaniel5/timer/timer',
+            'snap': 'snap install minimal-timer',
+            'winget': 'winget install DanilKodolov.MinimalTimer'
+        };
+
+        function showCmd(type) {
+            // Update buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Update text
+            const cmd = commands[type];
+            document.getElementById('cmd-text').textContent = cmd;
+
+            // Reset copy button
+            const btn = document.querySelector('.copy-btn');
+            btn.textContent = 'Copy';
+            btn.style.color = '';
+        }
+
+        function copyCmd() {
+            const text = document.getElementById('cmd-text').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                btn.textContent = 'Copied!';
+                btn.style.color = 'var(--success)';
+                setTimeout(() => {
+                    btn.textContent = 'Copy';
+                    btn.style.color = '';
+                }, 2000);
+            });
+        }
+    </script>
 </body>
 
 </html>

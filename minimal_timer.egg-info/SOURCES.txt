@@ -1,0 +1,9 @@
+LICENSE
+README.md
+setup.py
+timer.py
+minimal_timer.egg-info/PKG-INFO
+minimal_timer.egg-info/SOURCES.txt
+minimal_timer.egg-info/dependency_links.txt
+minimal_timer.egg-info/entry_points.txt
+minimal_timer.egg-info/top_level.txt

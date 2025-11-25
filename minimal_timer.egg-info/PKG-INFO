@@ -1,3 +1,49 @@
+Metadata-Version: 2.4
+Name: minimal-timer
+Version: 1.0.0
+Summary: A minimalist command-line timer with smart time parsing and system integration
+Home-page: https://github.com/dandaniel5/minimal-timer
+Author: Danil Kodolov
+Author-email: 
+License: GPL-3.0
+Project-URL: Bug Reports, https://github.com/dandaniel5/minimal-timer/issues
+Project-URL: Source, https://github.com/dandaniel5/minimal-timer
+Project-URL: Documentation, https://github.com/dandaniel5/minimal-timer#readme
+Keywords: timer countdown cli terminal pomodoro
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Console
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: End Users/Desktop
+Classifier: License :: OSI Approved :: GNU General Public License v3 (GPLv3)
+Classifier: Operating System :: OS Independent
+Classifier: Operating System :: POSIX
+Classifier: Operating System :: MacOS
+Classifier: Operating System :: Microsoft :: Windows
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Utilities
+Classifier: Topic :: Office/Business :: Scheduling
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Dynamic: author
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: keywords
+Dynamic: license
+Dynamic: license-file
+Dynamic: project-url
+Dynamic: requires-python
+Dynamic: summary
+
 # ⏰ Minimal Timer
 
 A minimalist command-line timer with smart time parsing and system integration.

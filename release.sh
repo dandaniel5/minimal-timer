@@ -235,7 +235,7 @@ PackageUrl: https://github.com/dandaniel5/minimal-timer
 Installers:
   - Architecture: x64
     InstallerType: portable
-    InstallerUrl: https://github.com/dandaniel5/minimal-timer/releases/download/v$VERSION/timer
+    InstallerUrl: https://github.com/dandaniel5/minimal-timer/releases/download/v$VERSION/timer.py
 ManifestType: singleton
 ManifestVersion: 1.0.0
 EOF
