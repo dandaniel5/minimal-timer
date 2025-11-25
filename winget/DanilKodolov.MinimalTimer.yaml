@@ -1,0 +1,13 @@
+PackageIdentifier: DanilKodolov.MinimalTimer
+PackageVersion: 1.0.0
+PackageName: Minimal Timer
+Publisher: Danil Kodolov
+License: MIT
+ShortDescription: A minimalist command-line timer with smart time parsing
+PackageUrl: https://github.com/dandaniel5/minimal-timer
+Installers:
+  - Architecture: x64
+    InstallerType: portable
+    InstallerUrl: https://github.com/dandaniel5/minimal-timer/releases/download/v1.0.0/timer
+ManifestType: singleton
+ManifestVersion: 1.0.0
