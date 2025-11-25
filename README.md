@@ -1,6 +1,8 @@
-# ⏰ Minimal Timer
+# [Minimal Timer](https://codelove.space/minimal-timer.html)
 
 A minimalist command-line timer with smart time parsing and system integration.
+
+
 
 [![PyPI](https://img.shields.io/pypi/v/minimal-timer?color=blue&label=pypi%20package)](https://pypi.org/project/minimal-timer/)
 [![Homebrew](https://img.shields.io/badge/homebrew-dandaniel5%2Ftimer-orange)](https://github.com/dandaniel5/homebrew-timer)

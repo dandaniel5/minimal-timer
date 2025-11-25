@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: minimal-timer
-Version: 1.0.0
+Version: 1.0.1
 Summary: A minimalist command-line timer with smart time parsing and system integration
 Home-page: https://github.com/dandaniel5/minimal-timer
 Author: Danil Kodolov
