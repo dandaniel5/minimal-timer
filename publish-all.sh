@@ -54,22 +54,30 @@ publish_pypi() {
 }
 
 # Function to update Homebrew
+# Function to update Homebrew
 publish_homebrew() {
     echo -e "${YELLOW}🍺 Updating Homebrew formula...${NC}"
     
-    FORMULA_DIR="Formula"
-    if [ ! -d "$FORMULA_DIR" ]; then
-        echo -e "${RED}❌ Formula directory not found${NC}"
+    # Clone homebrew-timer repo
+    rm -rf temp_homebrew_publish
+    git clone https://github.com/dandaniel5/homebrew-timer.git temp_homebrew_publish
+    
+    # Copy formula
+    if [ -f "Formula/timer.rb" ]; then
+        cp Formula/timer.rb temp_homebrew_publish/timer.rb
+        
+        cd temp_homebrew_publish
+        git add timer.rb
+        git commit -m "Update to version $VERSION" || echo "No changes to commit"
+        git push
+        cd ..
+        rm -rf temp_homebrew_publish
+        
+        echo -e "${GREEN}✅ Homebrew formula updated${NC}"
+    else
+        echo -e "${RED}❌ Formula/timer.rb not found${NC}"
         return 1
     fi
-    
-    cd "$FORMULA_DIR"
-    git add .
-    git commit -m "Update to version $VERSION" || true
-    git push
-    cd ..
-    
-    echo -e "${GREEN}✅ Homebrew formula updated${NC}"
 }
 
 # Function to publish to Snap
@@ -125,7 +133,7 @@ PackageUrl: https://github.com/dandaniel5/minimal-timer
 Installers:
   - Architecture: x64
     InstallerType: portable
-    InstallerUrl: https://github.com/dandaniel5/minimal-timer/releases/download/v$VERSION/timer
+    InstallerUrl: https://github.com/dandaniel5/minimal-timer/releases/download/v$VERSION/timer.py
 EOF
     
     echo -e "${GREEN}✅ Winget manifest created${NC}"

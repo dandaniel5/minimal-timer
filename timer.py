@@ -10,7 +10,9 @@ import json
 from datetime import datetime, timedelta
 from pathlib import Path
 
-def parse_time_string(time_str):
+__version__ = "1.0.1"
+
+def parse_time(time_str):
     """
     Parses a natural language time string into total seconds.
     Supports years, days, hours, minutes, seconds.

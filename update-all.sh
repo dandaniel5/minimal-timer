@@ -129,6 +129,42 @@ update_rpm() {
     fi
 }
 
+# Update timer.py
+update_timer_py() {
+    if [ -f "timer.py" ]; then
+        echo -e "${BLUE}📝 Updating timer.py...${NC}"
+        sed -i.bak "s/__version__ = \"[^\"]*\"/__version__ = \"$NEW_VERSION\"/" timer.py
+        rm -f timer.py.bak
+        echo -e "${GREEN}✅ timer.py updated${NC}"
+    fi
+}
+
+# Update minimal-timer.html
+update_html() {
+    if [ -f "minimal-timer.html" ]; then
+        echo -e "${BLUE}📝 Updating minimal-timer.html...${NC}"
+        sed -i.bak "s/v[0-9]\+\.[0-9]\+\.[0-9]\+/v$NEW_VERSION/" minimal-timer.html
+        rm -f minimal-timer.html.bak
+        echo -e "${GREEN}✅ minimal-timer.html updated${NC}"
+    fi
+}
+
+# Update documentation
+update_docs() {
+    echo -e "${BLUE}📝 Updating documentation...${NC}"
+    
+    # Update PUBLISHING.md (carefully)
+    if [ -f "PUBLISHING.md" ]; then
+        # Update JSON examples
+        sed -i.bak "s/\"version\": \"[0-9]\+\.[0-9]\+\.[0-9]\+\"/\"version\": \"$NEW_VERSION\"/" PUBLISHING.md
+        # Update URL examples
+        sed -i.bak "s/v[0-9]\+\.[0-9]\+\.[0-9]\+\/timer/v$NEW_VERSION\/timer/" PUBLISHING.md
+        rm -f PUBLISHING.md.bak
+    fi
+    
+    echo -e "${GREEN}✅ Documentation updated${NC}"
+}
+
 # Git tag and commit
 git_update() {
     echo -e "${BLUE}📝 Creating git commit and tag...${NC}"
@@ -162,6 +198,8 @@ show_summary() {
     [ -f "minimal-timer.nuspec" ] && echo -e "  ✅ .nuspec"
     [ -f "debian/control" ] && echo -e "  ✅ debian/control"
     [ -f "minimal-timer.spec" ] && echo -e "  ✅ .spec"
+    [ -f "timer.py" ] && echo -e "  ✅ timer.py"
+    [ -f "minimal-timer.html" ] && echo -e "  ✅ minimal-timer.html"
     
     echo ""
     echo -e "${YELLOW}📋 Next steps:${NC}"
@@ -195,6 +233,9 @@ main() {
     update_chocolatey
     update_debian
     update_rpm
+    update_timer_py
+    update_html
+    update_docs
     git_update
     
     show_summary
