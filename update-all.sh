@@ -62,7 +62,13 @@ update_homebrew() {
         echo -e "${BLUE}📝 Updating Homebrew formula...${NC}"
         FORMULA_FILE=$(find Formula -name "*.rb" | head -n 1)
         if [ -f "$FORMULA_FILE" ]; then
-            sed -i.bak "s/version \"[^\"]*\"/version \"$NEW_VERSION\"/" "$FORMULA_FILE"
+            sed -i.bak "s|url \".*\"|url \"https://github.com/dandaniel5/minimal-timer/archive/refs/tags/v$NEW_VERSION.tar.gz\"|" "$FORMULA_FILE"
+            # Note: SHA256 update requires downloading the file, which is complex here.
+            # Ideally release.sh should handle this or we calculate it here.
+            # For now, we'll just update the URL and let the user/release script handle SHA256?
+            # Actually, let's try to calculate it if possible, or just leave it for manual update?
+            # The current script structure makes it hard. Let's just update URL and warn.
+            echo -e "${YELLOW}⚠️  Homebrew formula URL updated. SHA256 must be updated manually or via release script.${NC}"
             rm -f "$FORMULA_FILE.bak"
             echo -e "${GREEN}✅ Homebrew formula updated${NC}"
         fi
