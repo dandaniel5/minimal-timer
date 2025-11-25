@@ -156,22 +156,30 @@ publish_pypi() {
 }
 
 # Update Homebrew
+# Update Homebrew
 publish_homebrew() {
     echo -e "${YELLOW}🍺 Updating Homebrew formula...${NC}"
     
-    FORMULA_DIR="Formula"
-    if [ ! -d "$FORMULA_DIR" ]; then
-        echo -e "${YELLOW}⚠️  Formula directory not found, skipping${NC}"
-        return 0
+    # Clone homebrew-timer repo
+    rm -rf temp_homebrew_release
+    git clone https://github.com/dandaniel5/homebrew-timer.git temp_homebrew_release
+    
+    # Copy formula
+    if [ -f "Formula/timer.rb" ]; then
+        cp Formula/timer.rb temp_homebrew_release/timer.rb
+        
+        cd temp_homebrew_release
+        git add timer.rb
+        git commit -m "Update to version $(get_current_version)" || echo "No changes to commit"
+        git push
+        cd ..
+        rm -rf temp_homebrew_release
+        
+        echo -e "${GREEN}✅ Homebrew formula updated${NC}"
+    else
+        echo -e "${RED}❌ Formula/timer.rb not found${NC}"
+        return 1
     fi
-    
-    cd "$FORMULA_DIR"
-    git add .
-    git commit -m "Update to version $(get_current_version)" || true
-    git push || echo -e "${YELLOW}⚠️  Failed to push Homebrew formula${NC}"
-    cd ..
-    
-    echo -e "${GREEN}✅ Homebrew formula updated${NC}"
 }
 
 # Publish to Snap
