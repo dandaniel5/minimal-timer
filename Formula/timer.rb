@@ -2,7 +2,7 @@ class Timer < Formula
   desc "Minimalist command-line timer with smart time parsing"
   homepage "https://github.com/dandaniel5/minimal-timer"
   url "https://github.com/dandaniel5/minimal-timer/archive/refs/tags/v1.0.2.tar.gz"
-  sha256 "d5558cd419c8d46bdc958064cb97f963d1ea793866414c025906ec15033512ed"
+  sha256 "402b8e7832b340a0871d2248807578cf445230867414f09be86ce5d293e22e2f"
   license "GPL-3.0"
 
   depends_on "python@3"
