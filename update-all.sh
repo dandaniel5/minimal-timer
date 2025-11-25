@@ -50,7 +50,7 @@ update_config() {
 update_setup_py() {
     if [ -f "setup.py" ]; then
         echo -e "${BLUE}📝 Updating setup.py...${NC}"
-        sed -i.bak "s/version='[^']*'/version='$NEW_VERSION'/" setup.py
+        sed -i.bak "s/version=\"[^\"]*\"/version=\"$NEW_VERSION\"/" setup.py
         rm -f setup.py.bak
         echo -e "${GREEN}✅ setup.py updated${NC}"
     fi

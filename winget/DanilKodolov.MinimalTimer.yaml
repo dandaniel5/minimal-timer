@@ -1,5 +1,5 @@
 PackageIdentifier: DanilKodolov.MinimalTimer
-PackageVersion: 1.0.1
+PackageVersion: 1.0.2
 PackageName: Minimal Timer
 Publisher: Danil Kodolov
 License: MIT
@@ -8,6 +8,6 @@ PackageUrl: https://github.com/dandaniel5/minimal-timer
 Installers:
   - Architecture: x64
     InstallerType: portable
-    InstallerUrl: https://github.com/dandaniel5/minimal-timer/releases/download/v1.0.1/timer.py
+    InstallerUrl: https://github.com/dandaniel5/minimal-timer/releases/download/v1.0.2/timer.py
 ManifestType: singleton
 ManifestVersion: 1.0.0

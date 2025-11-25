@@ -10,7 +10,7 @@ import json
 from datetime import datetime, timedelta
 from pathlib import Path
 
-__version__ = "1.0.1"
+__version__ = "1.0.2"
 
 def parse_time(time_str):
     """
@@ -178,7 +178,12 @@ def main():
     parser.add_argument('-sd', '--sleep-display', action='store_true', help="Sleep display after timer")
     parser.add_argument('-e', '--execute', type=str, help="Command to execute after timer")
     parser.add_argument('-ls', '--list', action='store_true', help="List all running timers")
+    parser.add_argument('-v', '--version', action='store_true', help="Show version info")
     args = parser.parse_args()
+    
+    if args.version:
+        print(f"Minimal Timer v{__version__}")
+        return
     
     # Handle list command
     if args.list:
