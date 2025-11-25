@@ -198,7 +198,7 @@ def main():
     full_time_str = " ".join(args.time_input)
     
     try:
-        duration_seconds = parse_time_string(full_time_str)
+        duration_seconds = parse_time(full_time_str)
     except Exception as e:
         print(f"Error parsing time: {e}")
         sys.exit(1)
