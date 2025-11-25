@@ -139,6 +139,7 @@ optional arguments:
   -e EXECUTE, --execute EXECUTE
                         Command to execute after timer
   -ls, --list           List all running timers
+  -v, --version         Show version info
 ```
 
 ## 🎯 Use Cases
