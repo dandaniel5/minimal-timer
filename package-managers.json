@@ -4,7 +4,7 @@
   "description": "A minimalist command-line timer with smart time parsing and system integration",
   "author": "Danil Kodolov",
   "homepage": "https://github.com/dandaniel5/minimal-timer",
-  "license": "MIT",
+  "license": "GPL-3.0",
   "managers": {
     "pypi": {
       "enabled": true,

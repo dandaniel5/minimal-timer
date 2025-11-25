@@ -3,7 +3,7 @@
 A minimalist command-line timer with smart time parsing and system integration.
 
 [![Homebrew](https://img.shields.io/badge/homebrew-dandaniel5%2Ftimer-orange)](https://github.com/dandaniel5/homebrew-timer)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 ## ✨ Features
 
@@ -168,7 +168,7 @@ Contributions are welcome! Feel free to:
 
 ## 📄 License
 
-MIT License - see [LICENSE](LICENSE) file for details.
+GPL v3 License - see [LICENSE](LICENSE) file for details.
 
 ## 👤 Author
 

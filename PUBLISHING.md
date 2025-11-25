@@ -653,4 +653,4 @@ chmod +x publish-all.sh update-all.sh
 ---
 
 **Created by**: Danil Kodolov  
-**License**: MIT
+**License**: GPL-3.0

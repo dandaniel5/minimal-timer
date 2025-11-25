@@ -19,7 +19,7 @@ setup(
     author="Danil Kodolov",
     author_email="",
     url="https://github.com/dandaniel5/minimal-timer",
-    license="MIT",
+    license="GPL-3.0",
     
     # Package data
     py_modules=["timer"],
@@ -42,7 +42,7 @@ setup(
         "Environment :: Console",
         "Intended Audience :: Developers",
         "Intended Audience :: End Users/Desktop",
-        "License :: OSI Approved :: MIT License",
+        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Operating System :: OS Independent",
         "Operating System :: POSIX",
         "Operating System :: MacOS",
