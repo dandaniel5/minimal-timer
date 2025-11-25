@@ -1,6 +1,6 @@
 {
   "package_name": "minimal-timer",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A minimalist command-line timer with smart time parsing and system integration",
   "author": "Danil Kodolov",
   "homepage": "https://github.com/dandaniel5/minimal-timer",

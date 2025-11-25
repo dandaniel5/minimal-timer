@@ -10,7 +10,7 @@ import json
 from datetime import datetime, timedelta
 from pathlib import Path
 
-__version__ = "1.0.3"
+__version__ = "1.0.4"
 
 def parse_time(time_str):
     """
