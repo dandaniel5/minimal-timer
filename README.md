@@ -6,8 +6,6 @@ A minimalist command-line timer with smart time parsing and system integration.
 
 [![PyPI](https://img.shields.io/pypi/v/minimal-timer?color=blue&label=pypi%20package)](https://pypi.org/project/minimal-timer/)
 [![Homebrew](https://img.shields.io/badge/homebrew-dandaniel5%2Ftimer-orange)](https://github.com/dandaniel5/homebrew-timer)
-[![Snap Store](https://img.shields.io/badge/snap-minimal--timer-orange)](https://snapcraft.io/minimal-timer)
-[![Winget](https://img.shields.io/badge/winget-DanilKodolov.MinimalTimer-blue)](https://github.com/microsoft/winget-pkgs/tree/master/manifests/d/DanilKodolov/MinimalTimer)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 ## ✨ Features
