@@ -5,39 +5,34 @@
 
 set -e  # Exit on error
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG_FILE="$SCRIPT_DIR/package-managers.json"
 
-echo -e "${BLUE}╔════════════════════════════════════════╗${NC}"
-echo -e "${BLUE}║  📦 Multi-Platform Publisher          ║${NC}"
-echo -e "${BLUE}╚════════════════════════════════════════╝${NC}"
+echo "╔════════════════════════════════════════╗"
+echo "║  📦 Multi-Platform Publisher          ║"
+echo "╚════════════════════════════════════════╝"
 echo ""
 
 # Check if config exists
 if [ ! -f "$CONFIG_FILE" ]; then
-    echo -e "${RED}❌ Config file not found: $CONFIG_FILE${NC}"
+    echo "❌ Config file not found: $CONFIG_FILE"
     exit 1
 fi
 
 # Read version from config
 VERSION=$(jq -r '.version' "$CONFIG_FILE")
-echo -e "${BLUE}📌 Version: $VERSION${NC}"
+echo "📌 Version: $VERSION"
 echo ""
 
 # Function to publish to PyPI
 publish_pypi() {
-    echo -e "${YELLOW}📦 Publishing to PyPI...${NC}"
+    echo "📦 Publishing to PyPI..."
     
     # Check if setup.py exists
     if [ ! -f "setup.py" ]; then
-        echo -e "${RED}❌ setup.py not found. Run setup first.${NC}"
+        echo "❌ setup.py not found. Run setup first."
         return 1
     fi
     
@@ -50,13 +45,13 @@ publish_pypi() {
     # Upload
     python3 -m twine upload dist/*
     
-    echo -e "${GREEN}✅ Published to PyPI${NC}"
+    echo "✅ Published to PyPI"
 }
 
 # Function to update Homebrew
 # Function to update Homebrew
 publish_homebrew() {
-    echo -e "${YELLOW}🍺 Updating Homebrew formula...${NC}"
+    echo "🍺 Updating Homebrew formula..."
     
     # Clone homebrew-timer repo
     rm -rf temp_homebrew_publish
@@ -73,34 +68,34 @@ publish_homebrew() {
         cd ..
         rm -rf temp_homebrew_publish
         
-        echo -e "${GREEN}✅ Homebrew formula updated${NC}"
+        echo "✅ Homebrew formula updated"
     else
-        echo -e "${RED}❌ Formula/timer.rb not found${NC}"
+        echo "❌ Formula/timer.rb not found"
         return 1
     fi
 }
 
 # Function to publish to Snap
 publish_snap() {
-    echo -e "${YELLOW}📸 Publishing to Snap Store...${NC}"
+    echo "📸 Publishing to Snap Store..."
     
     if [ ! -f "snap/snapcraft.yaml" ]; then
-        echo -e "${RED}❌ snapcraft.yaml not found${NC}"
+        echo "❌ snapcraft.yaml not found"
         return 1
     fi
     
     snapcraft
     snapcraft upload --release=stable *.snap
     
-    echo -e "${GREEN}✅ Published to Snap Store${NC}"
+    echo "✅ Published to Snap Store"
 }
 
 # Function to publish to AUR
 publish_aur() {
-    echo -e "${YELLOW}🏛️  Publishing to AUR...${NC}"
+    echo "🏛️  Publishing to AUR..."
     
     if [ ! -f "PKGBUILD" ]; then
-        echo -e "${RED}❌ PKGBUILD not found${NC}"
+        echo "❌ PKGBUILD not found"
         return 1
     fi
     
@@ -110,15 +105,15 @@ publish_aur() {
     git commit -m "Update to version $VERSION"
     git push
     
-    echo -e "${GREEN}✅ Published to AUR${NC}"
+    echo "✅ Published to AUR"
 }
 
 # Function to publish to Winget
 publish_winget() {
-    echo -e "${YELLOW}🪟 Creating Winget manifest...${NC}"
+    echo "🪟 Creating Winget manifest..."
     
-    echo -e "${BLUE}ℹ️  Winget requires manual PR to microsoft/winget-pkgs${NC}"
-    echo -e "${BLUE}   Manifest will be created in winget/ directory${NC}"
+    echo "ℹ️  Winget requires manual PR to microsoft/winget-pkgs"
+    echo "   Manifest will be created in winget/ directory"
     
     # Create manifest (simplified)
     mkdir -p winget
@@ -136,22 +131,22 @@ Installers:
     InstallerUrl: https://github.com/dandaniel5/minimal-timer/releases/download/v$VERSION/timer.py
 EOF
     
-    echo -e "${GREEN}✅ Winget manifest created${NC}"
+    echo "✅ Winget manifest created"
 }
 
 # Function to publish to Chocolatey
 publish_chocolatey() {
-    echo -e "${YELLOW}🍫 Publishing to Chocolatey...${NC}"
+    echo "🍫 Publishing to Chocolatey..."
     
     if [ ! -f "minimal-timer.nuspec" ]; then
-        echo -e "${RED}❌ .nuspec file not found${NC}"
+        echo "❌ .nuspec file not found"
         return 1
     fi
     
     choco pack
     choco push minimal-timer.*.nupkg --source https://push.chocolatey.org/
     
-    echo -e "${GREEN}✅ Published to Chocolatey${NC}"
+    echo "✅ Published to Chocolatey"
 }
 
 # Main publishing logic
@@ -160,36 +155,36 @@ publish_all() {
     
     for manager in $managers; do
         echo ""
-        echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         
         case $manager in
             pypi)
-                publish_pypi || echo -e "${RED}❌ Failed to publish to PyPI${NC}"
+                publish_pypi || echo "❌ Failed to publish to PyPI"
                 ;;
             homebrew)
-                publish_homebrew || echo -e "${RED}❌ Failed to update Homebrew${NC}"
+                publish_homebrew || echo "❌ Failed to update Homebrew"
                 ;;
             snap)
-                publish_snap || echo -e "${RED}❌ Failed to publish to Snap${NC}"
+                publish_snap || echo "❌ Failed to publish to Snap"
                 ;;
             aur)
-                publish_aur || echo -e "${RED}❌ Failed to publish to AUR${NC}"
+                publish_aur || echo "❌ Failed to publish to AUR"
                 ;;
             winget)
-                publish_winget || echo -e "${RED}❌ Failed to create Winget manifest${NC}"
+                publish_winget || echo "❌ Failed to create Winget manifest"
                 ;;
             chocolatey)
-                publish_chocolatey || echo -e "${RED}❌ Failed to publish to Chocolatey${NC}"
+                publish_chocolatey || echo "❌ Failed to publish to Chocolatey"
                 ;;
             *)
-                echo -e "${YELLOW}⚠️  $manager: Manual publishing required${NC}"
+                echo "⚠️  $manager: Manual publishing required"
                 ;;
         esac
     done
     
     echo ""
-    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${GREEN}✨ Publishing complete!${NC}"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "✨ Publishing complete!"
 }
 
 # Check for required tools
@@ -200,8 +195,8 @@ check_dependencies() {
     command -v python3 >/dev/null 2>&1 || missing+=("python3")
     
     if [ ${#missing[@]} -ne 0 ]; then
-        echo -e "${RED}❌ Missing dependencies: ${missing[*]}${NC}"
-        echo -e "${YELLOW}Install with: brew install ${missing[*]}${NC}"
+        echo "❌ Missing dependencies: ${missing[*]}"
+        echo "Install with: brew install ${missing[*]}"
         exit 1
     fi
 }
@@ -210,14 +205,14 @@ check_dependencies() {
 main() {
     check_dependencies
     
-    echo -e "${YELLOW}⚠️  This will publish to ALL enabled package managers.${NC}"
-    echo -e "${YELLOW}   Make sure you have proper credentials configured.${NC}"
+    echo "⚠️  This will publish to ALL enabled package managers."
+    echo "   Make sure you have proper credentials configured."
     echo ""
     read -p "Continue? (y/N): " -n 1 -r
     echo
     
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        echo -e "${RED}❌ Cancelled${NC}"
+        echo "❌ Cancelled"
         exit 1
     fi
     

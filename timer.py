@@ -10,7 +10,7 @@ import json
 from datetime import datetime, timedelta
 from pathlib import Path
 
-__version__ = "1.0.4"
+__version__ = "1.0.5"
 
 def parse_time(time_str):
     """
@@ -177,6 +177,7 @@ def main():
     parser.add_argument('-s', '--sleep', action='store_true', help="Sleep system after timer")
     parser.add_argument('-sd', '--sleep-display', action='store_true', help="Sleep display after timer")
     parser.add_argument('-e', '--execute', type=str, help="Command to execute after timer")
+    parser.add_argument('-sync', '--synchronize', action='store_true', help="Run timer in a loop (beep and restart)")
     parser.add_argument('-ls', '--list', action='store_true', help="List all running timers")
     parser.add_argument('-v', '--version', action='store_true', help="Show version info")
     args = parser.parse_args()
@@ -207,57 +208,73 @@ def main():
         print("Timer must be greater than 0.")
         sys.exit(1)
         
-    start_time = time.time()
-    end_time = start_time + duration_seconds
-    
     # Save timer info
     pid = os.getpid()
-    save_timer_info(args.name, pid, end_time)
     
     try:
         while True:
-            now = time.time()
-            remaining = end_time - now
+            start_time = time.time()
+            end_time = start_time + duration_seconds
             
-            if remaining <= 0:
-                break
+            # Update timer info with new end time
+            save_timer_info(args.name, pid, end_time)
+            
+            while True:
+                now = time.time()
+                remaining = end_time - now
                 
-            time_str = format_duration_short(remaining)
-            
-            # Single line output: name Xd Xh Xm Xs or just Xd Xh Xm Xs
+                if remaining <= 0:
+                    break
+                    
+                time_str = format_duration_short(remaining)
+                
+                # Single line output: name Xd Xh Xm Xs or just Xd Xh Xm Xs
+                if args.name:
+                    output = f"\r\033[K{args.name}  {time_str}"
+                else:
+                    output = f"\r\033[K{time_str}"
+                
+                sys.stdout.write(output)
+                sys.stdout.flush()
+                time.sleep(0.1)
+                
+            # Timer finished
             if args.name:
-                output = f"\r\033[K{args.name}  {time_str}"
+                print(f"\r\033[K{args.name}  Done!")
             else:
-                output = f"\r\033[K{time_str}"
+                print(f"\r\033[KDone!")
             
-            sys.stdout.write(output)
+            sys.stdout.write('\a')
             sys.stdout.flush()
-            time.sleep(0.1)
             
-        # Clean up timer info
-        remove_timer_info(pid)
-        
-        if args.name:
-            print(f"\r\033[K{args.name}  Done!")
-        else:
-            print(f"\r\033[KDone!")
-        
-        sys.stdout.write('\a')
-        sys.stdout.flush()
-        
-        # Handle sleep options
-        if args.sleep:
-            sleep_system()
-        elif args.sleep_display:
-            sleep_display()
+            # Handle sync mode
+            if args.synchronize:
+                # In sync mode, we just continue the outer loop
+                # Maybe add a small pause or just restart immediately?
+                # The user request says "beep every 3 minutes", so immediate restart seems appropriate.
+                continue
             
-        # Handle execution command
-        if args.execute:
-            try:
-                subprocess.run(args.execute, shell=True)
-            except Exception as e:
-                print(f"\nError executing command: {e}")
+            # If not in sync mode, handle other completion actions and break
+            
+            # Clean up timer info (only if not syncing, but we are breaking anyway)
+            remove_timer_info(pid)
+            
+            # Handle sleep options
+            if args.sleep:
+                sleep_system()
+            elif args.sleep_display:
+                sleep_display()
+                
+            # Handle execution command
+            if args.execute:
+                try:
+                    subprocess.run(args.execute, shell=True)
+                except Exception as e:
+                    print(f"\nError executing command: {e}")
+            
+            break
         
+
     except KeyboardInterrupt:
         # Clean up timer info
         remove_timer_info(pid)

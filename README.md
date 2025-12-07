@@ -1,6 +1,6 @@
 # [Minimal Timer](https://codelove.space/minimal-timer.html)
 
-A minimalist command-line timer with smart time parsing and system integration.
+A minimalist zeroconfig command-line timer with smart time parsing and system integration.
 
 
 
@@ -12,6 +12,7 @@ A minimalist command-line timer with smart time parsing and system integration.
 
 - 🕐 **Smart time parsing** - Natural language input: `10m`, `1h 30s`, `2d 5h`
 - 📝 **Optional labels** - Name your timers with `-n` flag
+- 🔄 **Sync mode** - Loop timer with beep using `-sync` flag
 - 💤 **Sleep integration** - Auto-sleep system (`-s`) or display (`-sd`) when done
 - 🚀 **Execute command** - Run any command when timer finishes (`-e "say done"`)
 - 📋 **Multiple timers** - Run multiple timers and list them with `-ls`
@@ -85,6 +86,9 @@ timer 30m -sd
 # Execute command after timer
 timer 5m -e "say 'Timer finished'"
 timer 10m -e "open https://google.com"
+
+# Sync mode (beep every 3 minutes)
+timer 3m -sync
 
 # List all running timers
 timer -ls
