@@ -10,13 +10,14 @@ import json
 from datetime import datetime, timedelta
 from pathlib import Path
 
-__version__ = "1.0.5"
+__version__ = "1.0.6"
 
 def parse_time(time_str):
     """
     Parses a natural language time string into total seconds.
     Supports years, days, hours, minutes, seconds.
     Default unit is minutes if no unit is specified for a number.
+    Raises ValueError if unrecognized content is found.
     """
     # Normalize input: lowercase
     time_str = time_str.lower()
@@ -24,9 +25,11 @@ def parse_time(time_str):
     # Regex to find number and optional unit
     # Matches: "10", "10m", "10 minutes", "1.5h", etc.
     pattern = r'(\d+(?:\.\d+)?)\s*([a-z]*)'
-    matches = re.findall(pattern, time_str)
+    
+    matches = list(re.finditer(pattern, time_str))
     
     total_seconds = 0
+    last_pos = 0
     
     # Define multipliers for seconds
     units = {
@@ -38,10 +41,15 @@ def parse_time(time_str):
         's': 1, 'sec': 1, 'second': 1, 'seconds': 1
     }
     
-    for amount_str, unit_str in matches:
-        if not amount_str:
-            continue
+    for match in matches:
+        # Check for unrecognized text before this match
+        unrecognized = time_str[last_pos:match.start()].strip()
+        if unrecognized:
+            raise ValueError(f"Unrecognized input: '{unrecognized}'")
             
+        amount_str = match.group(1)
+        unit_str = match.group(2)
+        
         amount = float(amount_str)
         unit = unit_str.strip()
         
@@ -51,9 +59,17 @@ def parse_time(time_str):
         elif unit in units:
             multiplier = units[unit]
         else:
-            continue
+            # Unit matches regex [a-z]* but is not in our supported units
+            # e.g. "10foobar" -> unit="foobar"
+            raise ValueError(f"Unrecognized unit: '{unit}'")
             
         total_seconds += amount * multiplier
+        last_pos = match.end()
+        
+    # Check for unrecognized text after last match
+    unrecognized = time_str[last_pos:].strip()
+    if unrecognized:
+        raise ValueError(f"Unrecognized input: '{unrecognized}'")
         
     return total_seconds
 
@@ -170,8 +186,14 @@ def sleep_display():
     except Exception as e:
         print(f"Failed to sleep display: {e}")
 
+class CustomArgumentParser(argparse.ArgumentParser):
+    def error(self, message):
+        sys.stderr.write(f"Error: {message}\n")
+        sys.stderr.write("Try 'timer --help' for more information.\n")
+        sys.exit(2)
+
 def main():
-    parser = argparse.ArgumentParser(description="Smart Terminal Timer")
+    parser = CustomArgumentParser(description="Smart Terminal Timer")
     parser.add_argument('time_input', nargs='*', help="Time to count down (e.g. '10m', '1h 30s', '5'). Default unit is minutes.")
     parser.add_argument('-n', '--name', type=str, help="Timer name/label")
     parser.add_argument('-s', '--sleep', action='store_true', help="Sleep system after timer")
@@ -192,8 +214,7 @@ def main():
         sys.exit(0)
     
     if not args.time_input:
-        print("Please provide a time duration.")
-        sys.exit(1)
+        parser.error("Please provide a time duration.")
         
     # Join all arguments to handle "1 hour 30 minutes" as a single string
     full_time_str = " ".join(args.time_input)
@@ -201,11 +222,13 @@ def main():
     try:
         duration_seconds = parse_time(full_time_str)
     except Exception as e:
-        print(f"Error parsing time: {e}")
+        print(f"Error: {e}")
+        print("Try 'timer --help' for more information.")
         sys.exit(1)
         
     if duration_seconds <= 0:
-        print("Timer must be greater than 0.")
+        print("Error: Timer must be greater than 0.")
+        print("Try 'timer --help' for more information.")
         sys.exit(1)
         
     # Save timer info
@@ -250,8 +273,6 @@ def main():
             # Handle sync mode
             if args.synchronize:
                 # In sync mode, we just continue the outer loop
-                # Maybe add a small pause or just restart immediately?
-                # The user request says "beep every 3 minutes", so immediate restart seems appropriate.
                 continue
             
             # If not in sync mode, handle other completion actions and break
