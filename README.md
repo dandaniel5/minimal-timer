@@ -18,6 +18,13 @@ A minimalist zeroconfig command-line timer with smart time parsing and system in
 - 📋 **Multiple timers** - Run multiple timers and list them with `-ls`
 - 🗂️ **Groups** - `-g` / `--group` (default group name: `default`, like a primary group)
 - 🎛️ **Batch control** - stop/pause/resume/reset all or per group; `--adjust` to add/subtract remaining time
+
+### Live orchestration (what makes it different)
+
+Most CLI timers are fire-and-forget. Here you can keep **one long-running foreground process** per timer (often with `&` in the shell) and **drive it from another terminal** without a background service: pause, resume, stretch or shrink the remaining time (`--adjust`), or reset the whole group to the original duration. State lives in small JSON files under your OS temp directory (`smart_timers/`); the countdown loop re-reads them, so **no signal hacks and no broker process** — unusual for a zero-config tool.
+
+- **Groups** (`-g`): tag timers like `work`, `cooking`, or rely on the built-in default group `default` when you omit `-g`. List, stop, pause, or reset **only that slice** of your timers.
+- **Safety**: `--stop-*` kills the process and deletes state; `--pause-*` only freezes the remaining interval so you can resume later.
 - ⚡ **Minimal output** - Clean, distraction-free countdown
 - 🔔 **Audio notification** - Bell sound on completion
 - 🌍 **Universal** - Works in bash, zsh, fish, and other shells

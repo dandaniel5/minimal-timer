@@ -392,6 +392,30 @@ class CustomArgumentParser(argparse.ArgumentParser):
         sys.stderr.write("Try 'timer --help' for more information.\n")
         sys.exit(2)
 
+TIMER_HELP_EPILOG = f"""
+Unique to this CLI:
+  • Live control without restarting the countdown process: pause, resume, add/subtract
+    time (--adjust) while the same timer keeps running in another shell — state is synced
+    via JSON in the OS temp directory under smart_timers/ (see tempfile.gettempdir();
+    often $TMPDIR on Unix)
+  • Named groups (-g): default group is "{DEFAULT_GROUP}" (like a primary group); filter
+    -ls, or stop/pause/reset a whole team of background timers at once.
+
+Quick examples:
+  timer 25m -n Pomodoro -g work &
+  timer -ls -g work
+  timer --pause -n Pomodoro
+  timer --adjust +10m -n Pomodoro
+  timer --resume -n Pomodoro
+  timer --reset-group work
+  timer --stop-all
+
+Notes:
+  --reset-* needs duration_seconds in state (timers started with this version).
+  --stop / --pause / --resume / --reset (single timer) need -n; add -g if names collide.
+  --clear-all and --clear-group are aliases for --stop-all / --stop-group.
+""".strip()
+
 def poll_timer_state(pid):
     path = TIMERS_DIR / f"timer_{pid}.json"
     if not path.exists():
@@ -485,37 +509,62 @@ def run_countdown_loop(args, pid, duration_seconds, initial_end_time):
         sys.exit(0)
 
 def main():
-    parser = CustomArgumentParser(description="Smart Terminal Timer")
-    parser.add_argument('time_input', nargs='*', help="Time to count down (e.g. '10m', '1h 30s', '5'). Default unit is minutes.")
-    parser.add_argument('-n', '--name', type=str, default="", help="Timer name/label")
-    parser.add_argument('-g', '--group', type=str, default=None, help=f"Timer group (default: '{DEFAULT_GROUP}')")
-    parser.add_argument('-s', '--sleep', action='store_true', help="Sleep system after timer")
-    parser.add_argument('-sd', '--sleep-display', action='store_true', help="Sleep display after timer")
-    parser.add_argument('-e', '--execute', type=str, help="Command to execute after timer")
-    parser.add_argument('-sync', '--synchronize', action='store_true', help="Run timer in a loop (beep and restart)")
-    parser.add_argument('-ls', '--list', action='store_true', help="List running timers (optional: -g to filter)")
-    parser.add_argument('-v', '--version', action='store_true', help="Show version info")
+    parser = CustomArgumentParser(
+        description=(
+            "Minimal Timer — smart countdown with natural time parsing, optional labels, "
+            "and orchestration of many background timers via groups (no separate daemon)."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=TIMER_HELP_EPILOG,
+    )
+    parser.add_argument(
+        'time_input',
+        nargs='*',
+        help="Duration to count down, e.g. 10m, 1h 30s, 2d (bare number = minutes).",
+    )
+    parser.add_argument('-n', '--name', type=str, default="", help="Label for this timer (required for --stop/--pause/--resume/--reset/--adjust on one timer).")
+    parser.add_argument(
+        '-g', '--group',
+        type=str,
+        default=None,
+        help=f"Logical group for this timer (default when omitted: '{DEFAULT_GROUP}'). Use with -ls or batch flags to target a subset.",
+    )
+    parser.add_argument('-s', '--sleep', action='store_true', help="macOS: put the system to sleep when the countdown finishes.")
+    parser.add_argument('-sd', '--sleep-display', action='store_true', help="macOS: turn display off when the countdown finishes.")
+    parser.add_argument('-e', '--execute', type=str, help="Shell command to run after the countdown finishes (once, unless -sync).")
+    parser.add_argument('-sync', '--synchronize', action='store_true', help="Loop: beep and restart the same duration until Ctrl+C.")
+    parser.add_argument('-ls', '--list', action='store_true', help="List running timers; add -g GROUP to show only that group (shows group, remaining, paused/running, pid).")
+    parser.add_argument('-v', '--version', action='store_true', help="Print version and exit.")
 
-    parser.add_argument('--stop-all', action='store_true', help="Stop (kill) all timers and remove state")
-    parser.add_argument('--stop-group', metavar='GROUP', help="Stop all timers in GROUP")
-    parser.add_argument('--stop', action='store_true', help="Stop timer(s) with matching -n (and optional -g)")
+    parser.add_argument('--stop-all', action='store_true', help="Kill every tracked timer process and delete all state files.")
+    parser.add_argument('--stop-group', metavar='GROUP', help="Kill all timers whose group is GROUP.")
+    parser.add_argument('--stop', action='store_true', help="Kill timer(s) with exact name from -n; optional -g disambiguates duplicates.")
 
-    parser.add_argument('--pause-all', action='store_true', help="Pause all timers")
-    parser.add_argument('--pause-group', metavar='GROUP', help="Pause all timers in GROUP")
-    parser.add_argument('--pause', action='store_true', help="Pause timer(s) matching -n (optional -g)")
+    parser.add_argument('--pause-all', action='store_true', help="Pause every running timer (freeze remaining; no new process).")
+    parser.add_argument('--pause-group', metavar='GROUP', help="Pause all timers in GROUP.")
+    parser.add_argument('--pause', action='store_true', help="Pause by -n (and optional -g); or use --pause-all / --pause-group.")
 
-    parser.add_argument('--resume-all', action='store_true', help="Resume all paused timers")
-    parser.add_argument('--resume-group', metavar='GROUP', help="Resume paused timers in GROUP")
-    parser.add_argument('--resume', action='store_true', help="Resume timer(s) matching -n (optional -g)")
+    parser.add_argument('--resume-all', action='store_true', help="Resume every timer that was paused with the pause-* commands.")
+    parser.add_argument('--resume-group', metavar='GROUP', help="Resume all paused timers in GROUP.")
+    parser.add_argument('--resume', action='store_true', help="Resume by -n (and optional -g).")
 
-    parser.add_argument('--reset-all', action='store_true', help="Reset all timers to original duration (needs duration_seconds in state)")
-    parser.add_argument('--reset-group', metavar='GROUP', help="Reset all timers in GROUP to original duration")
-    parser.add_argument('--reset', action='store_true', help="Reset timer(s) matching -n (optional -g)")
+    parser.add_argument(
+        '--reset-all',
+        action='store_true',
+        help="Set each timer's end time to now + saved original duration (skipped if duration_seconds missing in state).",
+    )
+    parser.add_argument('--reset-group', metavar='GROUP', help="Same as --reset-all but only for timers in GROUP.")
+    parser.add_argument('--reset', action='store_true', help="Reset one named timer (-n, optional -g) to its original duration.")
 
-    parser.add_argument('--clear-all', action='store_true', help="Alias for --stop-all")
-    parser.add_argument('--clear-group', metavar='GROUP', help="Stop all timers in GROUP (same as --stop-group)")
+    parser.add_argument('--clear-all', action='store_true', help="Same as --stop-all (naming alias).")
+    parser.add_argument('--clear-group', metavar='GROUP', help="Same as --stop-group.")
 
-    parser.add_argument('--adjust', metavar='DELTA', type=str, help="Add/subtract time from remaining, e.g. +10d, -5m (use with -n, optional -g)")
+    parser.add_argument(
+        '--adjust',
+        metavar='DELTA',
+        type=str,
+        help="Change remaining time on running/paused timer(s) named with -n: same syntax as duration, with leading + or -, e.g. +10d, -5m. Optional -g.",
+    )
 
     args = parser.parse_args()
 
