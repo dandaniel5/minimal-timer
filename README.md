@@ -16,6 +16,8 @@ A minimalist zeroconfig command-line timer with smart time parsing and system in
 - 💤 **Sleep integration** - Auto-sleep system (`-s`) or display (`-sd`) when done
 - 🚀 **Execute command** - Run any command when timer finishes (`-e "say done"`)
 - 📋 **Multiple timers** - Run multiple timers and list them with `-ls`
+- 🗂️ **Groups** - `-g` / `--group` (default group name: `default`, like a primary group)
+- 🎛️ **Batch control** - stop/pause/resume/reset all or per group; `--adjust` to add/subtract remaining time
 - ⚡ **Minimal output** - Clean, distraction-free countdown
 - 🔔 **Audio notification** - Bell sound on completion
 - 🌍 **Universal** - Works in bash, zsh, fish, and other shells
@@ -92,6 +94,46 @@ timer 3m -sync
 
 # List all running timers
 timer -ls
+
+# List only timers in a group
+timer -ls -g work
+
+# Start in a group (default group is "default" if -g omitted)
+timer 45m -n "Standup" -g work
+```
+
+### Groups and managing running timers
+
+```bash
+# Stop every running timer (kills process, removes state)
+timer --stop-all
+
+# Stop all timers in one group
+timer --stop-group work
+
+# Stop one named timer (optional -g to disambiguate)
+timer --stop -n "Pomodoro" -g work
+
+# Pause / resume (works while timer runs in another terminal)
+timer --pause-all
+timer --pause-group work
+timer --pause -n "Pomodoro"
+timer --resume-all
+timer --resume-group work
+timer --resume -n "Pomodoro"
+
+# Reset to the original duration (needs internal duration_seconds; new timers have it)
+timer --reset-all
+timer --reset-group work
+timer --reset -n "Pomodoro"
+
+# Add or subtract from remaining time (+/- uses the same time parser as starting a timer)
+timer --adjust +10d -n "Vacation"
+timer --adjust -5m -n "Pomodoro" -g work
+
+# Aliases: same as --stop-all / --stop-group
+timer --clear-all
+timer --clear-group work
 ```
 
 ### Advanced Usage
@@ -106,9 +148,9 @@ timer 10m -n "Break" &
 timer -ls
 # Output:
 # Running timers:
-#   Meeting  59m 30s
-#   Pomodoro  24m 15s
-#   Break  9m 45s
+#   [default]  Meeting  59m 30s  (running)  pid=...
+#   [default]  Pomodoro  24m 15s  (running)  pid=...
+#   [default]  Break  9m 45s  (running)  pid=...
 
 # Complex duration with sleep
 timer 1w 2d 3h -n "Vacation countdown" -sd
@@ -127,22 +169,7 @@ timer 1w 2d 3h -n "Vacation countdown" -sd
 
 ### Command-Line Options
 
-```
-usage: timer [-h] [-n NAME] [-s] [-sd] [-ls] [time_input ...]
-
-positional arguments:
-  time_input            Time to count down (e.g. '10m', '1h 30s', '5')
-
-optional arguments:
-  -h, --help            Show help message
-  -n NAME, --name NAME  Timer name/label
-  -s, --sleep           Sleep system after timer completes
-  -sd, --sleep-display  Sleep display only after timer completes
-  -e EXECUTE, --execute EXECUTE
-                        Command to execute after timer
-  -ls, --list           List all running timers
-  -v, --version         Show version info
-```
+Run `timer --help` for the full list (groups, `--stop-all`, `--pause-group`, `--adjust`, etc.).
 
 ## 🎯 Use Cases
 
@@ -176,7 +203,7 @@ timer -ls
 ## 📝 How It Works
 
 1. **Parsing**: The timer uses regex to parse natural language time input, supporting multiple units in a single command
-2. **Countdown**: Updates every 100ms for smooth display, showing only non-zero time units
+2. **Countdown**: Updates about every 120ms; the process re-reads its JSON state so pause/resume/adjust from another shell apply without signals
 3. **Tracking**: Saves timer info to temp directory (`/tmp/smart_timers/`) for multi-timer support
 4. **Sleep Integration**: Uses macOS `pmset` commands to trigger system or display sleep
 5. **Cleanup**: Automatically removes timer info on completion or cancellation
